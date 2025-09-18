@@ -22,6 +22,11 @@ export class IndexComponent extends ExtensionComponent {
     description: 'Whether to index all .svh files',
   })
 
+  extraSymlinkSource: ConfigObject<string[]> = new ConfigObject({
+    default: [],
+    description: 'Add extra source file directories for symlink',
+  })
+
   // <workspace-specific-dir>/.sv_cache/files
   cacheDir: vscode.Uri | undefined
 
@@ -121,6 +126,9 @@ export class IndexComponent extends ExtensionComponent {
     }
 
     let files: vscode.Uri[] = await ext.findModules()
+
+    let promises = this.extraSymlinkSource.getValue().map((dir)=>ext.findModules(dir))
+    files = files.concat((await Promise.all(promises)).flat())
     this.logger.info('indexing ' + files.length + ' files')
 
     await vscode.window.withProgress(

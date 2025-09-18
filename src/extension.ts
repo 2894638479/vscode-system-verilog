@@ -338,9 +338,8 @@ export class VerilogExtension extends ActivityBarComponent {
     return this.languageServer.server.getValue() === LanguageServers.Slang
   }
 
-  public async findFiles(globs: string[]): Promise<vscode.Uri[]> {
-    let ws = getWorkspaceFolder()
-    if (ws === undefined) {
+  public async findFiles(globs: string[],folder:string | undefined = getWorkspaceFolder()): Promise<vscode.Uri[]> {
+    if(folder === undefined) {
       return []
     }
     const exclude: string = this.excludeGlob.getValue()
@@ -350,7 +349,7 @@ export class VerilogExtension extends ActivityBarComponent {
       if (path.isAbsolute(str)) {
         ret = (await asyncGlob(str)).map((p) => vscode.Uri.file(p))
       } else {
-        ret = await vscode.workspace.findFiles(new vscode.RelativePattern(ws, str), exclude)
+        ret = await vscode.workspace.findFiles(new vscode.RelativePattern(folder, str), exclude)
       }
       return ret
     }
@@ -369,8 +368,8 @@ export class VerilogExtension extends ActivityBarComponent {
     return await this.findFiles(incGlobs)
   }
 
-  public async findModules(): Promise<vscode.Uri[]> {
-    return await this.findFiles(this.moduleGlobs.getValue())
+  public async findModules(folder:string | undefined = getWorkspaceFolder()): Promise<vscode.Uri[]> {
+    return await this.findFiles(this.moduleGlobs.getValue(),folder)
   }
 }
 
