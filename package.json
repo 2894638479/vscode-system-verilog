@@ -708,6 +708,16 @@
             "type": "string"
           }
         },
+        "verilog.languageServer.pathToVeribleSyntax": {
+          "default": "verible-verilog-syntax",
+          "description": "Path to the verible-verilog-syntax tool",
+          "type": "string"
+        },
+        "verilog.languageServer.autoLoadModules": {
+          "default": false,
+          "description": "Automatically find modules used in current file, and load them to language server. need verible-verilog-syntax be set correctly and enable symlinks",
+          "type": "boolean"
+        },
         "verilog.inlayHints.wildcardPorts": {
           "default": "on",
           "description": "Show wildcard port hints (.*: port1, port2, etc.) in module instantiation",

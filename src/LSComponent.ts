@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node'
 import { CommandNode, ConfigObject, ExtensionComponent } from './lib/libconfig'
 import { anyVerilogSelector, systemverilogSelector } from './utils'
+import { activateAutoLoad, deactivateAutoLoad } from './autoloader'
 
 export enum LanguageServers {
   Ctags = 'ctags',
@@ -51,6 +52,16 @@ export class LanguageServerComponent extends ExtensionComponent {
     description: 'Arguments to pass to the server when debugging',
   })
 
+  pathToVeribleSyntax: ConfigObject<string> = new ConfigObject({
+    default: "verible-verilog-syntax",
+    description: 'Path to the verible-verilog-syntax tool',
+  })
+
+  autoLoadModules: ConfigObject<boolean> = new ConfigObject<boolean>({
+    default: false,
+    description: "Automatically find modules used in current file, and load them to language server. need verible-verilog-syntax be set correctly and enable symlinks"
+  })
+
   restartLanguageServer: CommandNode = new CommandNode(
     {
       title: 'Restart Language Server',
@@ -85,6 +96,7 @@ export class LanguageServerComponent extends ExtensionComponent {
   }
 
   async stop() {
+    deactivateAutoLoad()
     if (this.client !== undefined) {
       await this.client.stop()
       this.client = undefined
@@ -105,6 +117,9 @@ export class LanguageServerComponent extends ExtensionComponent {
 
     this.client = new LanguageClient(selection, selection, serverOptions, clientOptions)
     await this.client.start()
+    if(this.autoLoadModules.getValue()) {
+      activateAutoLoad(this.logger)
+    }
     this.logger.info(`${selection} language server started`)
   }
 }
